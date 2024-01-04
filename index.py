@@ -7,6 +7,8 @@ import input
 
 
 units = list(input.units.keys())
+min_lat, max_lat = (25, 37)
+min_lon, max_lon = (-112.5, -87.5)
 
 
 app = Dash(
@@ -26,6 +28,13 @@ app.layout = dbc.Container([
             dbc.Card(
                 dbc.CardBody([
                     html.H5('Map with units locations and technical information'),
+                    html.Div(
+                        dcc.Graph(
+                            id='id-graph-map',
+                            config={'displayModeBar': False},
+                            style={'maxWidth':' 800px', 'margin': 'auto'}
+                            ) 
+                    ),
                 ]), className='mb-2 shadow-box'),
         ], xxl=8, className='mb-2', style={'display': 'grid'}),
 
@@ -152,6 +161,75 @@ def generate_graph_results(results, colors, units):
             y=0.5, 
             showarrow=False
             )
+    
+    return fig
+
+
+@callback(
+    Output('id-graph-map', 'figure'),
+    Input('id-store-units', 'data'),
+    Input('id-store-colors', 'data')
+)
+def generate_graph_map(units, colors):
+
+    fig = go.Figure()
+    for unit in units.keys():
+        kind = units[unit]['type']
+        fig.add_trace(
+            go.Scattergeo(
+            lon=[units[unit]['lon']],
+            lat=[units[unit]['lat']],
+            text=[unit],
+            mode='markers',
+            name='',
+            customdata=[units[unit]['power']],
+            showlegend=False,
+            hovertemplate='%{text} : %{customdata} MW',
+            marker=dict(
+                size=units[unit]['power']/10,
+                opacity=0.6,
+                reversescale=True,
+                autocolorscale=False,
+                symbol='circle',
+                color=colors[kind],
+                line=dict(
+                    width=1,
+                    color='black',
+                    ),
+                )
+            )
+        )
+
+    fig.add_trace(
+        go.Scattergeo(
+            lon=[ ele[0] for ele in input.texas_boundaries ],
+            lat=[ ele[1] for ele in input.texas_boundaries ],
+            line_color='brown',
+            line_width=2,
+            mode='lines',
+            showlegend=False,
+            hoverinfo='none',
+            text=[ 'border' for _ in input.texas_boundaries ],
+        ))
+
+    fig.update_layout(
+            height=375, 
+            margin={'r':5,'t':5,'l':5,'b':5},
+            geo=dict(
+                landcolor='rgb(250, 250, 250)',
+                oceancolor='#ccf5ff',
+                lakecolor='#ccf5ff',
+                showcountries=True,
+                showlakes=True,
+                showland=True,
+                showocean=True,
+                showrivers=True,
+                resolution=50, 
+                scope='world',
+                lataxis={'range': [min_lat, max_lat]},
+                lonaxis={'range': [min_lon, max_lon]},
+            ), 
+        )
     
     return fig
 
