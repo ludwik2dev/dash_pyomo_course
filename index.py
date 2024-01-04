@@ -93,6 +93,16 @@ def generate_graph_results(results, colors, units):
         ticks='outside',
         mirror=True
     )
+
+    if results is None:
+        fig.add_annotation(
+            text='To see results click button first',
+            xref='paper', 
+            yref='paper',
+            x=0.5, 
+            y=0.5, 
+            showarrow=False
+            )
     
     return fig
 
