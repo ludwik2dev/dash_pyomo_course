@@ -71,7 +71,7 @@ app.layout = dbc.Container([
                 ]), className='mb-2 shadow-box'),
         ], xxl=8, className='mb-2', style={'display': 'grid'})
     ]), 
-])
+], className='main-container')
 
 
 @callback(

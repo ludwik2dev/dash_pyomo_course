@@ -1,0 +1,16 @@
+body {
+    background-color: lightgrey;
+}
+
+.main-container {
+    background: white;
+    min-height: 100vh;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    padding-right: 2rem;
+    padding-left: 2rem;
+}
+
+.shadow-box {
+    box-shadow: 17px 24px 29px -9px rgba(66, 68, 90, 1);
+}
