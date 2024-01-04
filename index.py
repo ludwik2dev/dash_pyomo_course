@@ -51,7 +51,7 @@ app.layout = dbc.Container([
                                     { 'field': 'lat', 'resizable': True},
                                     { 'field': 'lon', 'resizable': True},
                                     ],
-                                dashGridOptions={'pagination':True, 'paginationAutoPageSize': True},
+                                dashGridOptions={'pagination':True, 'paginationAutoPageSize': True, 'rowSelection':'single'},
                                 columnSize='responsiveSizeToFit',
                                 )
                             ),             
@@ -275,6 +275,36 @@ def create_grid(units, colors):
     }
     
     return data, getRowStyle
+
+
+@callback(
+    Output('id-graph-map', 'figure', allow_duplicate=True),
+    Input('id-table', 'selectedRows'),
+    State('id-graph-map', 'figure'),
+    prevent_initial_call=True
+)
+def create_annotation(row_selected, figure): 
+
+    print(row_selected)
+
+    lat = (float(row_selected[0]['lat']) - min_lat) / ( max_lat - min_lat )
+    lon = (float(row_selected[0]['lon']) - min_lon) / ( max_lon - min_lon )
+    text = row_selected[0]['name']
+
+    figure['layout']['annotations'] = [
+            dict(
+                xref='paper',
+                yref='paper',
+                x=lon, 
+                y=lat,
+                text=text,
+                showarrow=False,
+                bgcolor='white',
+                opacity=0.6,
+            ),
+        ]
+
+    return figure 
 
 
 if __name__ == '__main__':
