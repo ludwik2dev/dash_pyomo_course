@@ -12,41 +12,31 @@ app = Dash(__name__)
 app.layout = html.Div([
 
     dcc.Store(id='id-store-units', data=input.units),
-    dcc.Store(id='id-store-results', data=input.results),
+    dcc.Store(id='id-store-results', data=None),
     dcc.Store(id='id-store-colors', data=input.units_colors),
 
-    html.Div('Hello World'),
-    dcc.Dropdown(
-        id='id-dropdown-1',
-        options=units,
-        value=units[1],  # 'Coal 2',
-        multi=False
-    ),
-    html.H4(id='id-output-1'),
-    html.P(id='id-output-2'),
+    html.Button('Generate results', id='id-button-generate-results', n_clicks=0),
 
     dcc.Graph(
         id='id-graph-results', 
         config={'displayModeBar': False},
         className='p-1'
         ),   
-
 ])
 
 
 @callback(
-    Output('id-output-1', 'children'),
-    Output('id-output-2', 'children'),
-    Input('id-dropdown-1', 'value'),
-    State('id-store-units', 'data'),
+    Output('id-store-results', 'data'),
+    Input('id-button-generate-results', 'n_clicks'),
     prevent_initial_call=True
 )
-def select_dropdown(value, units):
-
-    text_1 = f'First selection: {value}'
-    text_2 = f'Power of chose unit: {units[value]["power"]}'
-
-    return text_1, text_2
+def generate_results(click):
+    
+    '''Simulating running pyomo model'''
+    
+    results = input.results
+    
+    return results
 
 
 @callback(
