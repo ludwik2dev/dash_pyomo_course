@@ -14,31 +14,36 @@ app = Dash(
     external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP],
     )
 
-app.layout = html.Div([
+app.layout = dbc.Container([
 
     dcc.Store(id='id-store-units', data=input.units),
     dcc.Store(id='id-store-results', data=None),
     dcc.Store(id='id-store-colors', data=input.units_colors),
 
-    html.Div(
-        dbc.Button([
-            html.I(className='bi bi-power me-2'),
-            'Generate results',
-            ],
-            id='id-button-generate-results',
-            n_clicks=0,
-            outline=True, 
-            color='secondary',
-            className='d-flex align-items-center'
+    dbc.Row([
+        dbc.Col([
+            html.Div(
+                dbc.Button([
+                    html.I(className='bi bi-power me-2'),
+                    'Generate results',
+                    ],
+                    id='id-button-generate-results',
+                    n_clicks=0,
+                    outline=True, 
+                    color='secondary',
+                    className='d-flex align-items-center'
+                    ),
+                className='d-grid gap-2'
             ),
-        className='d-grid gap-2'
-    ),
-
-    dcc.Graph(
-        id='id-graph-results', 
-        config={'displayModeBar': False},
-        className='p-1'
-        ),   
+        ], xxl=4),
+        dbc.Col([
+            dcc.Graph(
+                id='id-graph-results', 
+                config={'displayModeBar': False},
+                className='p-1'
+                ),  
+        ], xxl=8)
+    ]), 
 ])
 
 
