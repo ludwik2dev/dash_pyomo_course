@@ -268,9 +268,9 @@ def create_grid(units, colors):
     getRowStyle = {
         'styleConditions': [
             {
-                'condition': f"params.data.name == '{unit['name']}'",
-                'style': {'color': unit['color']},
-            } for unit in data
+                'condition': f"params.data.type == '{kind}'",
+                'style': {'color': color},
+            } for kind, color in colors.items()
         ] 
     }
     
