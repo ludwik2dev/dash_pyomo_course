@@ -21,28 +21,55 @@ app.layout = dbc.Container([
     dcc.Store(id='id-store-colors', data=input.units_colors),
 
     dbc.Row([
+
         dbc.Col([
-            html.Div(
-                dbc.Button([
-                    html.I(className='bi bi-power me-2'),
-                    'Generate results',
-                    ],
-                    id='id-button-generate-results',
-                    n_clicks=0,
-                    outline=True, 
-                    color='secondary',
-                    className='d-flex align-items-center'
+            dbc.Card(
+                dbc.CardBody([
+                    html.H5('Map with units locations and technical information'),
+                ]), className='mb-2 shadow-box'),
+        ], xxl=8, className='mb-2', style={'display': 'grid'}),
+
+        dbc.Col([
+            dbc.Card(
+                dbc.CardBody([
+                    html.H5("Unit's geographical coordinates"),                
+                ]), className='mb-2 shadow-box'),
+        ], xxl=4, className='mb-2', style={'display': 'grid'})
+    ]), 
+
+    dbc.Row([
+
+        dbc.Col([
+            dbc.Card(
+                dbc.CardBody([
+                    html.H5('Configuration panel'),
+                    html.Div(
+                        dbc.Button([
+                            html.I(className='bi bi-power me-2'),
+                            'Generate results',
+                            ],
+                            id='id-button-generate-results',
+                            n_clicks=0,
+                            outline=True, 
+                            color='secondary',
+                            className='d-flex align-items-center'
+                            ),
+                        className='d-grid gap-2'
                     ),
-                className='d-grid gap-2'
-            ),
-        ], xxl=4),
+                ]), className='mb-2 shadow-box'),
+        ], xxl=4, className='mb-2', style={'display': 'grid'}),
+
         dbc.Col([
-            dcc.Graph(
-                id='id-graph-results', 
-                config={'displayModeBar': False},
-                className='p-1'
-                ),  
-        ], xxl=8)
+            dbc.Card(
+                dbc.CardBody([
+                    html.H5('Unit commitment results'),
+                    dcc.Graph(
+                        id='id-graph-results',
+                        config={'displayModeBar': False},
+                        className='p-1'
+                        ),                  
+                ]), className='mb-2 shadow-box'),
+        ], xxl=8, className='mb-2', style={'display': 'grid'})
     ]), 
 ])
 
