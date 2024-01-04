@@ -25,7 +25,11 @@ app.layout = html.Div([
     html.H4(id='id-output-1'),
     html.P(id='id-output-2'),
 
-    dcc.Graph(id='id-graph-results'),  
+    dcc.Graph(
+        id='id-graph-results', 
+        config={'displayModeBar': False},
+        className='p-1'
+        ),   
 
 ])
 
