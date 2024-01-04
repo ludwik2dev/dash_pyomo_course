@@ -247,5 +247,35 @@ def generate_graph_map(units, colors):
     return fig
 
 
+@callback(
+    Output('id-table', 'rowData'), 
+    Output('id-table', 'getRowStyle'), 
+    Input('id-store-units', 'data'),
+    Input('id-store-colors', 'data'),
+)
+def create_grid(units, colors):
+
+    data = []
+    for key, value in units.items():
+        value['name'] = key
+        data.append(value)
+    df = pd.DataFrame.from_dict(data)
+
+    df_colors = pd.DataFrame(list( zip( colors.keys(), colors.values() ) ), columns=['type', 'color']) 
+    df = df.merge(df_colors, on=['type'])
+    data = df.to_dict('records')
+    
+    getRowStyle = {
+        'styleConditions': [
+            {
+                'condition': f"params.data.name == '{unit['name']}'",
+                'style': {'color': unit['color']},
+            } for unit in data
+        ] 
+    }
+    
+    return data, getRowStyle
+
+
 if __name__ == '__main__':
     app.run(debug=True)
