@@ -1,5 +1,7 @@
 from dash import Dash, html, dcc, callback, Output, Input, State
 import plotly.graph_objects as go
+import dash_bootstrap_components as dbc
+
 
 import input
 
@@ -7,7 +9,10 @@ import input
 units = list(input.units.keys())
 
 
-app = Dash(__name__)
+app = Dash(
+    __name__, 
+    external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP],
+    )
 
 app.layout = html.Div([
 
@@ -15,7 +20,19 @@ app.layout = html.Div([
     dcc.Store(id='id-store-results', data=None),
     dcc.Store(id='id-store-colors', data=input.units_colors),
 
-    html.Button('Generate results', id='id-button-generate-results', n_clicks=0),
+    html.Div(
+        dbc.Button([
+            html.I(className='bi bi-power me-2'),
+            'Generate results',
+            ],
+            id='id-button-generate-results',
+            n_clicks=0,
+            outline=True, 
+            color='secondary',
+            className='d-flex align-items-center'
+            ),
+        className='d-grid gap-2'
+    ),
 
     dcc.Graph(
         id='id-graph-results', 
