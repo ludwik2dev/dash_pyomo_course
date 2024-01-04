@@ -1,7 +1,8 @@
 from dash import Dash, html, dcc, callback, Output, Input, State
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
-
+import dash_ag_grid as dag
+import pandas as pd
 
 import input
 
@@ -41,7 +42,19 @@ app.layout = dbc.Container([
         dbc.Col([
             dbc.Card(
                 dbc.CardBody([
-                    html.H5("Unit's geographical coordinates"),                
+                    html.H5("Unit's geographical coordinates"),   
+                            html.Div(
+                            dag.AgGrid(
+                                id='id-table',   
+                                columnDefs=[
+                                    { 'field': 'name', 'sortable': True, 'resizable': True},
+                                    { 'field': 'lat', 'resizable': True},
+                                    { 'field': 'lon', 'resizable': True},
+                                    ],
+                                dashGridOptions={'pagination':True, 'paginationAutoPageSize': True},
+                                columnSize='responsiveSizeToFit',
+                                )
+                            ),             
                 ]), className='mb-2 shadow-box'),
         ], xxl=4, className='mb-2', style={'display': 'grid'})
     ]), 
