@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, callback, Output, Input
+from dash import Dash, html, dcc, callback, Output, Input, State
 
 import input
 
@@ -31,7 +31,7 @@ app.layout = html.Div([
     Output('id-output-1', 'children'),
     Output('id-output-2', 'children'),
     Input('id-dropdown-1', 'value'),
-    Input('id-dropdown-2', 'value'),
+    State('id-dropdown-2', 'value'),
     prevent_initial_call=True
 )
 def select_dropdown(value_1, value_2):
