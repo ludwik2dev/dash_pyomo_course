@@ -21,24 +21,7 @@ app = Dash(
 
 app.layout = dbc.Container([
 
-    html.Div([
-        dbc.Alert(
-            'Example of success alert Example of success alert Example of success alert', 
-            is_open=True, 
-            color='success',
-            ),
-        dbc.Alert(
-            'Example of info alert', 
-            is_open=True, 
-            color='info',
-            duration=5000,
-            ),
-        dbc.Alert(
-            'Example of warning alert', 
-            is_open=True, 
-            color='warning',
-            )
-    ],
+    html.Div([],
         id='id-alert-container', 
             style={
                 'position': 'absolute',
@@ -128,6 +111,20 @@ app.layout = dbc.Container([
         ], xxl=8, className='mb-2', style={'display': 'grid'})
     ]), 
 ], className='main-container')
+
+
+def make_alerts(alerts, msg, color):
+    ALERT_TIME = 10  # sec
+    alerts.append(
+        dbc.Alert(
+            msg, 
+            is_open=True, 
+            color=color, 
+            duration=ALERT_TIME*1000
+            )
+        )
+
+    return alerts
 
 
 @callback(
@@ -384,39 +381,54 @@ def open_modal_update_delete_unit(clickData, units):
 @callback(
     Output('id-modal-update-delete-unit', 'is_open', allow_duplicate=True),
     Output('id-store-units', 'data', allow_duplicate=True), 
+    Output('id-alert-container', 'children', allow_duplicate=True),
     Input('id-button-delete', 'n_clicks'),
     State('id-store-units', 'data'), 
     State('id-modal-update-delete-unit-header', 'children'),
+    State('id-alert-container', 'children'),
     prevent_initial_call=True
 )
-def delete_unit(click, data, name):
+def delete_unit(click, data, name, alerts):
 
     del data[name]
 
-    return False, data
+    msg = f'Deleted unit: {name}'
+    color = 'success'
+    alerts = make_alerts(alerts, msg, color)
+
+    return False, data, alerts
 
 
 @callback(
     Output('id-modal-update-delete-unit', 'is_open', allow_duplicate=True),
     Output('id-store-units', 'data', allow_duplicate=True), 
+    Output('id-alert-container', 'children', allow_duplicate=True),
     Input('id-button-update', 'n_clicks'),
     State('id-store-units', 'data'), 
     State('id-modal-update-delete-unit-header', 'children'),
     State('id-input-update-delete-power', 'value'),
     State('id-input-update-delete-vc', 'value'),
+    State('id-alert-container', 'children'),
     prevent_initial_call=True
 )
-def update_unit(click, data, name, power, vc):
+def update_unit(click, data, name, power, vc, alerts):
 
     # Error handling
     for value in [power, vc]:
         if value is None or value < 0 or value > 1500:
-            return False, no_update
+            msg = f'Unit: {name} was not updated.'
+            color = 'warning'
+            alerts = make_alerts(alerts, msg, color)
+            return False, no_update, alerts
 
     data[name]['power'] = power
     data[name]['vc'] = vc
 
-    return False, data
+    msg = f'Updated unit: {name}'
+    color = 'success'
+    alerts = make_alerts(alerts, msg, color)
+
+    return False, data, alerts
 
 
 @callback(
@@ -442,6 +454,7 @@ def open_modal_create_unit(select):
     Output('id-modal-create-unit', 'is_open', allow_duplicate=True),
     Output('id-store-units', 'data', allow_duplicate=True), 
     Output('id-input-create-name', 'value', allow_duplicate=True),
+    Output('id-alert-container', 'children', allow_duplicate=True),
     Input('id-button-create', 'n_clicks'),
     State('id-store-units', 'data'), 
     State('id-input-create-name', 'value'),
@@ -450,14 +463,18 @@ def open_modal_create_unit(select):
     State('id-input-create-vc', 'value'),
     State('id-input-create-lat', 'value'),
     State('id-input-create-lon', 'value'),
+    State('id-alert-container', 'children'),
     prevent_initial_call=True
 )
-def create_unit(click, data, name, kind, power, vc, lat, lon):
+def create_unit(click, data, name, kind, power, vc, lat, lon, alerts):
 
     # Error handling
     for value in [power, vc]:
         if value is None or value < 0 or value > 1500:
-            return False, data, None
+            msg = f'Unit: {name} was not created.'
+            color = 'warning'
+            alerts = make_alerts(alerts, msg, color)
+            return False, data, None, alerts
 
     new_unit = {
         'type': kind, 
@@ -467,8 +484,12 @@ def create_unit(click, data, name, kind, power, vc, lat, lon):
         'vc': vc, 
     }
     data[name] = new_unit
+
+    msg = f'Created unit: {name}'
+    color = 'success'
+    alerts = make_alerts(alerts, msg, color)
     
-    return False, data, None
+    return False, data, None, alerts
 
 
 @callback(
