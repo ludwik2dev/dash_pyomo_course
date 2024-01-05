@@ -116,5 +116,5 @@ modal_change_color = dbc.Modal([
     ]),
 ],
     id='id-modal-change-color',
-    is_open=True
+    is_open=False
 )
