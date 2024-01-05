@@ -21,6 +21,35 @@ app = Dash(
 
 app.layout = dbc.Container([
 
+    html.Div([
+        dbc.Alert(
+            'Example of success alert Example of success alert Example of success alert', 
+            is_open=True, 
+            color='success',
+            ),
+        dbc.Alert(
+            'Example of info alert', 
+            is_open=True, 
+            color='info',
+            duration=5000,
+            ),
+        dbc.Alert(
+            'Example of warning alert', 
+            is_open=True, 
+            color='warning',
+            )
+    ],
+        id='id-alert-container', 
+            style={
+                'position': 'absolute',
+                'zIndex': '10001',
+                'right': 0,
+                'marginRight': '2rem',
+                'opacity': 0.75,
+                'width': '15rem',
+            },
+    ),
+
     modals.modal_update_delete,
     modals.modal_create,
 
