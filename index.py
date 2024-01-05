@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, callback, Output, Input, State
+from dash import Dash, html, dcc, callback, Output, Input, State, Patch
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 import dash_ag_grid as dag
@@ -243,6 +243,7 @@ def generate_graph_map(units, colors):
                 lonaxis={'range': [min_lon, max_lon]},
             ), 
         )
+    fig.add_annotation(x=0, y=0, text='', showarrow=False)
     
     return fig
 
@@ -280,18 +281,18 @@ def create_grid(units, colors):
 @callback(
     Output('id-graph-map', 'figure', allow_duplicate=True),
     Input('id-table', 'selectedRows'),
-    State('id-graph-map', 'figure'),
     prevent_initial_call=True
 )
-def create_annotation(row_selected, figure): 
-
-    print(row_selected)
+def create_annotation(row_selected): 
 
     lat = (float(row_selected[0]['lat']) - min_lat) / ( max_lat - min_lat )
     lon = (float(row_selected[0]['lon']) - min_lon) / ( max_lon - min_lon )
     text = row_selected[0]['name']
 
-    figure['layout']['annotations'] = [
+    patched_figure = Patch()
+    patched_figure['layout']['annotations'].clear()
+    patched_figure['layout']['annotations'].extend(
+        [
             dict(
                 xref='paper',
                 yref='paper',
@@ -302,9 +303,9 @@ def create_annotation(row_selected, figure):
                 bgcolor='white',
                 opacity=0.6,
             ),
-        ]
+        ])
 
-    return figure 
+    return patched_figure 
 
 
 if __name__ == '__main__':
