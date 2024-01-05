@@ -392,16 +392,21 @@ def update_unit(click, data, name, power, vc):
 
 @callback(
     Output('id-modal-create-unit', 'is_open'),
+    Output('id-input-create-lat', 'value'),
+    Output('id-input-create-lon', 'value'),
     Input('id-graph-map', 'selectedData'),
     prevent_initial_call=True
 )
 def open_modal_create_unit(select):
     
-    print(select)
     if select is None:
         raise PreventUpdate  # return no_update
     
-    return True
+    rectangle = select['range']['geo']
+    lon = round( 0.5 * ( rectangle[0][0] + rectangle[1][0] ), 2 )
+    lat = round( 0.5 * ( rectangle[0][1] + rectangle[1][1] ), 2 )
+    
+    return True, lat, lon
 
 
 if __name__ == '__main__':
