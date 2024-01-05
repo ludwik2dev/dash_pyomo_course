@@ -5,6 +5,7 @@ import dash_ag_grid as dag
 import pandas as pd
 
 import input
+from partials import modals
 
 
 units = list(input.units.keys())
@@ -18,6 +19,8 @@ app = Dash(
     )
 
 app.layout = dbc.Container([
+
+    modals.modal_update_delete,
 
     dcc.Store(id='id-store-units', data=input.units),
     dcc.Store(id='id-store-results', data=None),
