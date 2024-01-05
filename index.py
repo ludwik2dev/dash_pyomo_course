@@ -3,6 +3,7 @@ import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 import dash_ag_grid as dag
 import pandas as pd
+from dash.exceptions import PreventUpdate
 
 import input
 from partials import modals
@@ -333,6 +334,8 @@ def delete_annotations(row_selected):
 def open_modal_update_delete_unit(clickData):
 
     print(clickData)
+    if clickData['points'][0]['text'] == 'border':
+        raise PreventUpdate
 
     return True, None
 
