@@ -95,5 +95,5 @@ modal_create = dbc.Modal([
     ]),
 ],
     id='id-modal-create-unit',
-    is_open=True
+    is_open=False
 )

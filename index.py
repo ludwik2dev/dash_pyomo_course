@@ -37,7 +37,7 @@ app.layout = dbc.Container([
                     html.Div(
                         dcc.Graph(
                             id='id-graph-map',
-                            config={'displayModeBar': False},
+                            config={'modeBarButtonsToRemove': ['lasso2d', 'zoom2d', 'pan2d', 'zoomInGeo', 'zoomOutGeo', 'resetScale2d', 'resetGeo', 'zoom2d', 'toImage'], 'displaylogo': False},
                             style={'maxWidth':' 800px', 'margin': 'auto'}
                             ) 
                     ),
@@ -388,6 +388,20 @@ def update_unit(click, data, name, power, vc):
     data[name]['vc'] = vc
 
     return False, data
+
+
+@callback(
+    Output('id-modal-create-unit', 'is_open'),
+    Input('id-graph-map', 'selectedData'),
+    prevent_initial_call=True
+)
+def open_modal_create_unit(select):
+    
+    print(select)
+    if select is None:
+        raise PreventUpdate  # return no_update
+    
+    return True
 
 
 if __name__ == '__main__':
