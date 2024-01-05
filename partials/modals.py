@@ -1,5 +1,6 @@
 import dash_bootstrap_components as dbc
 from dash import dcc
+import dash_daq as daq
 
 import input
 
@@ -96,4 +97,24 @@ modal_create = dbc.Modal([
 ],
     id='id-modal-create-unit',
     is_open=False
+)
+
+modal_change_color = dbc.Modal([
+
+    dbc.ModalHeader(dbc.ModalTitle('Change color')),
+
+    dbc.ModalBody([
+
+        daq.ColorPicker(
+            id='id-color-picker',
+            label='unit type'
+            ),
+
+    ], style={'margin': 'auto'}),        
+    dbc.ModalFooter([
+        dbc.Button('Save', id='id-button-change-color', n_clicks=0, color='success'),
+    ]),
+],
+    id='id-modal-change-color',
+    is_open=True
 )
