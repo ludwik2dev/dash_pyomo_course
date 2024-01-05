@@ -22,6 +22,7 @@ app = Dash(
 app.layout = dbc.Container([
 
     modals.modal_update_delete,
+    modals.modal_create,
 
     dcc.Store(id='id-store-units', data=input.units),
     dcc.Store(id='id-store-results', data=None),

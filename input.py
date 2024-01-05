@@ -27,6 +27,8 @@ units_colors = {
     'demand': '#098331',
 }
 
+unit_types = ['coal', 'gas', 'nuclear', 'demand']
+
 # Source: https://github.com/PublicaMundi/MappingAPI/blob/master/data/geojson/us-states.json?short_path=1c1ebe5
 texas_boundaries = [
     [-101.812942,36.501861],[-100.000075,36.501861],[-100.000075,34.563024],[-99.923398,34.573978],[-99.698843,34.382285],
