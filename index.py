@@ -308,5 +308,18 @@ def create_annotation(row_selected):
     return patched_figure 
 
 
+@callback(
+    Output('id-graph-map', 'figure', allow_duplicate=True),
+    Input('id-table', 'cellDoubleClicked'),
+    prevent_initial_call=True
+)
+def delete_annotations(row_selected):
+
+    patched_figure = Patch()
+    patched_figure['layout']['annotations'].clear()
+
+    return patched_figure 
+
+
 if __name__ == '__main__':
     app.run(debug=True)
