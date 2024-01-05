@@ -374,16 +374,12 @@ def delete_unit(click, data, name):
     State('id-modal-update-delete-unit-header', 'children'),
     State('id-input-update-delete-power', 'value'),
     State('id-input-update-delete-vc', 'value'),
-    State('id-input-update-delete-lat', 'value'),
-    State('id-input-update-delete-lon', 'value'),
     prevent_initial_call=True
 )
-def update_unit(click, data, name, power, vc, lat, lon):
+def update_unit(click, data, name, power, vc):
 
     data[name]['power'] = power
     data[name]['vc'] = vc
-    data[name]['lat'] = lat
-    data[name]['lon'] = lon
 
     return False, data
 
