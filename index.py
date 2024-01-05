@@ -351,5 +351,20 @@ def open_modal_update_delete_unit(clickData, units):
     return True, None, unit, power, vc, lat, lon
 
 
+@callback(
+    Output('id-modal-update-delete-unit', 'is_open', allow_duplicate=True),
+    Output('id-store-units', 'data', allow_duplicate=True), 
+    Input('id-button-delete', 'n_clicks'),
+    State('id-store-units', 'data'), 
+    State('id-modal-update-delete-unit-header', 'children'),
+    prevent_initial_call=True
+)
+def delete_unit(click, data, name):
+
+    del data[name]
+
+    return False, data
+
+
 if __name__ == '__main__':
     app.run(debug=True)
