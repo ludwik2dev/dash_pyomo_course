@@ -39,5 +39,5 @@ modal_update_delete = dbc.Modal([
     ]),
 ],
     id='id-modal-update-delete-unit',
-    is_open=True
+    is_open=False
 )

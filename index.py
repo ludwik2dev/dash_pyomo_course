@@ -324,5 +324,18 @@ def delete_annotations(row_selected):
     return patched_figure 
 
 
+@callback(
+    Output('id-modal-update-delete-unit', 'is_open'),
+    Output('id-graph-map', 'clickData'),
+    Input('id-graph-map', 'clickData'),
+    prevent_initial_call=True
+)
+def open_modal_update_delete_unit(clickData):
+
+    print(clickData)
+
+    return True, None
+
+
 if __name__ == '__main__':
     app.run(debug=True)
