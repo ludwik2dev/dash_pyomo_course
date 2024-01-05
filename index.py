@@ -518,7 +518,7 @@ def generate_colors_div(colors):
         lst.append(
             dbc.Button(
                 key.title(),
-                id={'index': f'id-button-color-{key}', 'type': 'change-color'},
+                id=f'id-button-color-{key}',
                 style={'color': value,},
                 color='link'
             )
