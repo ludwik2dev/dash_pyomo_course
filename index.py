@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, callback, Output, Input, State, Patch
+from dash import Dash, html, dcc, callback, Output, Input, State, Patch, no_update
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 import dash_ag_grid as dag
@@ -377,6 +377,11 @@ def delete_unit(click, data, name):
     prevent_initial_call=True
 )
 def update_unit(click, data, name, power, vc):
+
+    # Error handling
+    for value in [power, vc]:
+        if value is None or value < 0 or value > 1500:
+            return False, no_update
 
     data[name]['power'] = power
     data[name]['vc'] = vc
