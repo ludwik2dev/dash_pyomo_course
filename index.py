@@ -328,16 +328,27 @@ def delete_annotations(row_selected):
 @callback(
     Output('id-modal-update-delete-unit', 'is_open'),
     Output('id-graph-map', 'clickData'),
+    Output('id-modal-update-delete-unit-header', 'children'),
+    Output('id-input-update-delete-power', 'value'),
+    Output('id-input-update-delete-vc', 'value'),
+    Output('id-input-update-delete-lat', 'value'),
+    Output('id-input-update-delete-lon', 'value'),
     Input('id-graph-map', 'clickData'),
+    State('id-store-units', 'data'),
     prevent_initial_call=True
 )
-def open_modal_update_delete_unit(clickData):
+def open_modal_update_delete_unit(clickData, units):
 
-    print(clickData)
     if clickData['points'][0]['text'] == 'border':
         raise PreventUpdate
-
-    return True, None
+    
+    unit = clickData['points'][0]['text']
+    power = units[unit]['power']
+    vc = units[unit]['vc']
+    lat = units[unit]['lat']
+    lon = units[unit]['lon']
+    
+    return True, None, unit, power, vc, lat, lon
 
 
 if __name__ == '__main__':
