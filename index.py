@@ -442,5 +442,18 @@ def create_unit(click, data, name, kind, power, vc, lat, lon):
     return False, data, None
 
 
+@callback(
+    Output('id-button-create', 'disabled'),
+    Input('id-input-create-name', 'value'),
+    State('id-store-units', 'data'), 
+    prevent_initial_call=True
+)
+def check_unit_name(text, data):
+
+    if text is None or len(text) < 3 or text in data.keys():
+        return True
+    return False
+
+
 if __name__ == '__main__':
     app.run(debug=True)

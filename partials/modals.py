@@ -91,7 +91,7 @@ modal_create = dbc.Modal([
         ])
     ]),        
     dbc.ModalFooter([
-        dbc.Button('Create', id='id-button-create', n_clicks=0, color='success', disabled=False),
+        dbc.Button('Create', id='id-button-create', n_clicks=0, color='success', disabled=True),
     ]),
 ],
     id='id-modal-create-unit',
