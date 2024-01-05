@@ -366,5 +366,27 @@ def delete_unit(click, data, name):
     return False, data
 
 
+@callback(
+    Output('id-modal-update-delete-unit', 'is_open', allow_duplicate=True),
+    Output('id-store-units', 'data', allow_duplicate=True), 
+    Input('id-button-update', 'n_clicks'),
+    State('id-store-units', 'data'), 
+    State('id-modal-update-delete-unit-header', 'children'),
+    State('id-input-update-delete-power', 'value'),
+    State('id-input-update-delete-vc', 'value'),
+    State('id-input-update-delete-lat', 'value'),
+    State('id-input-update-delete-lon', 'value'),
+    prevent_initial_call=True
+)
+def update_unit(click, data, name, power, vc, lat, lon):
+
+    data[name]['power'] = power
+    data[name]['vc'] = vc
+    data[name]['lat'] = lat
+    data[name]['lon'] = lon
+
+    return False, data
+
+
 if __name__ == '__main__':
     app.run(debug=True)
