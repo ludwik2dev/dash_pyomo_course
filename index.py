@@ -82,6 +82,8 @@ app.layout = dbc.Container([
             dbc.Card(
                 dbc.CardBody([
                     html.H5('Configuration panel'),
+                    html.H6('Change color of unit type:', className='my-3'),
+                    html.Div(id='id-div-colors'),
                     html.Div(
                         dbc.Button([
                             html.I(className='bi bi-power me-2'),
@@ -503,6 +505,26 @@ def check_unit_name(text, data):
     if text is None or len(text) < 3 or text in data.keys():
         return True
     return False
+
+
+@callback(
+    Output('id-div-colors', 'children'),
+    Input('id-store-colors', 'data')
+)
+def generate_colors_div(colors):
+    
+    lst = []
+    for key, value in colors.items():
+        lst.append(
+            dbc.Button(
+                key.title(),
+                id={'index': f'id-button-color-{key}', 'type': 'change-color'},
+                style={'color': value,},
+                color='link'
+            )
+        )
+
+    return lst
 
 
 if __name__ == '__main__':
