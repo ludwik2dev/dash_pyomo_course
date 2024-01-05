@@ -147,7 +147,7 @@ def generate_results(click):
 @callback(
     Output('id-graph-results', 'figure'),
     Input('id-store-results', 'data'),
-    State('id-store-colors', 'data'),
+    Input('id-store-colors', 'data'),
     State('id-store-units', 'data'),
 )
 def generate_graph_results(results, colors, units):
@@ -547,6 +547,23 @@ def open_modal_color_change(clicks, colors):
     label = unit_clicked
 
     return True, color, label
+
+
+@callback(
+    Output('id-modal-change-color', 'is_open', allow_duplicate=True),
+    Output('id-store-colors', 'data'),
+    Input('id-button-change-color', 'n_clicks'),
+    State('id-color-picker', 'value'),
+    State('id-color-picker', 'label'),
+    State('id-store-colors', 'data'),
+    prevent_initial_call=True
+)
+def save_color(click, value, unit, colors):
+
+    color = value['hex']
+    colors[unit] = color
+
+    return False, colors
 
 
 if __name__ == '__main__':
