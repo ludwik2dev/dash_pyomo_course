@@ -412,7 +412,6 @@ def open_modal_create_unit(select):
 @callback(
     Output('id-modal-create-unit', 'is_open', allow_duplicate=True),
     Output('id-store-units', 'data', allow_duplicate=True), 
-    Output('id-graph-map', 'clickData', allow_duplicate=True),
     Output('id-input-create-name', 'value', allow_duplicate=True),
     Input('id-button-create', 'n_clicks'),
     State('id-store-units', 'data'), 
@@ -429,7 +428,7 @@ def create_unit(click, data, name, kind, power, vc, lat, lon):
     # Error handling
     for value in [power, vc]:
         if value is None or value < 0 or value > 1500:
-            return False, no_update
+            return False, data, None
 
     new_unit = {
         'type': kind, 
@@ -440,7 +439,7 @@ def create_unit(click, data, name, kind, power, vc, lat, lon):
     }
     data[name] = new_unit
     
-    return False, data, None, None
+    return False, data, None
 
 
 if __name__ == '__main__':
