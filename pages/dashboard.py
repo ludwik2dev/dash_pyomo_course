@@ -563,7 +563,3 @@ def save_color(click, value, unit, colors):
     colors[unit] = color
 
     return False, colors
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
