@@ -7,7 +7,9 @@ import input
 from partials import modals
 
 
-layout = dbc.Container([
+def layout():
+    
+    return dbc.Container([
 
     html.Div([],
         id='id-alert-container', 
