@@ -89,6 +89,8 @@ def layout():
                             ),
                         className='d-grid gap-2'
                     ),
+                    html.H6('Daily costs of running power grid:', className='my-3'),
+                    dcc.Loading(html.Div('---', id='id-div-results')),
                 ]), className='mb-2 shadow-box'),
         ], xxl=4, className='mb-2', style={'display': 'grid'}),
 

@@ -6,6 +6,8 @@ import pandas as pd
 from dash.exceptions import PreventUpdate
 
 import input
+from pyo_model import uc_model
+import time
 
 
 min_lat, max_lat = (25, 37)
@@ -28,16 +30,36 @@ def make_alerts(alerts, msg, color):
 
 @callback(
     Output('id-store-results', 'data'),
+    Output('id-div-results', 'children'),
+    Output('id-alert-container', 'children'),
     Input('id-button-generate-results', 'n_clicks'),
+    State('id-store-units', 'data'),
+    State('id-alert-container', 'children'),
     prevent_initial_call=True
 )
-def generate_results(click):
+def generate_results(click, units, alerts):
     
     '''Simulating running pyomo model'''
+    time.sleep(3)
     
-    results = input.results
+    model = uc_model(units)
+    if not model:
+
+        sys_cost = 'No solution for provided input.'
+        
+        msg = f'Error during model computation. Check input data.' 
+        color = 'warning'
+        alerts = make_alerts(alerts, msg, color)
+
+        return None, sys_cost, alerts
+
+    sys_cost = model[1]
     
-    return results
+    msg = f'Model was computed successfully'  
+    color = 'success'
+    alerts = make_alerts(alerts, msg, color)
+
+    return model[0], sys_cost, alerts
 
 
 @callback(
