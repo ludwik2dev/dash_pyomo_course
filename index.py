@@ -10,11 +10,16 @@ app = Dash(
     )
 
 app.layout = html.Div([
-    html.Div([
-        html.Div(
-            dcc.Link(f"{page['name']} - {page['path']}", href=page["relative_path"])
-        ) for page in dash.page_registry.values()
-    ]),
+    dbc.NavbarSimple([
+        dbc.NavItem(dbc.NavLink('Home', href='/')),
+        dbc.NavItem(dbc.NavLink('Dashboard', href='dashboard')),
+    ],
+    brand='Unit Commitment App',
+    brand_href='/',
+    color='secondary',
+    dark=True,
+    className='px-4',
+    ),    
     dash.page_container
 ])
 
