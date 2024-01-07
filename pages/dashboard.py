@@ -29,6 +29,7 @@ layout = dbc.Container([
                 'marginRight': '2rem',
                 'opacity': 0.75,
                 'width': '15rem',
+                'top': '1rem',
             },
     ),
 
