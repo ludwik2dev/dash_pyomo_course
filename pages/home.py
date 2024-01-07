@@ -9,4 +9,4 @@ layout = html.Div([
     html.H1('Welcome home!'),
     html.Br(),
     html.P('Describe your app here!'),
-])
+], className='page-container')

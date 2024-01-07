@@ -5,6 +5,10 @@ body {
 .main-container {
     background: white;
     min-height: 100vh;
+    padding: 0;
+}
+
+.page-container {
     padding-top: 1rem;
     padding-bottom: 1rem;
     padding-right: 2rem;

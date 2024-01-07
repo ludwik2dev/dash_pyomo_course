@@ -9,7 +9,7 @@ app = Dash(
     use_pages=True
     )
 
-app.layout = html.Div([
+app.layout = dbc.Container([
     dbc.NavbarSimple([
         dbc.NavItem(dbc.NavLink('Home', href='/')),
         dbc.NavItem(dbc.NavLink('Dashboard', href='dashboard')),
@@ -21,7 +21,7 @@ app.layout = html.Div([
     className='px-4',
     ),    
     dash.page_container
-])
+], className='main-container')
 
 
 if __name__ == '__main__':
