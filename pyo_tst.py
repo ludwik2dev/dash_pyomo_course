@@ -4,8 +4,8 @@ import pathlib
 
 # Data
 fruits = {
-    'Apple': {'price': 4, 'size': 3},
-    'Pear': {'price': 7, 'size': 5},
+    'Apple': {'price': 4, 'size': 3, 'max_quantity': 20},
+    'Pear': {'price': 7, 'size': 5, 'max_quantity': 10},
 }
 MAX_BASKET_SIZE = 60
 
@@ -16,7 +16,10 @@ model = pyo.ConcreteModel()
 model.fruits = pyo.Set(initialize=fruits.keys())
 
 # Add variable - this we want to calculate / find
-model.quantity = pyo.Var(model.fruits, domain=pyo.NonNegativeIntegers)
+def fruit_bounds(m, fruit):
+    return ( 0, fruits[fruit]['max_quantity'] )
+
+model.quantity = pyo.Var(model.fruits, domain=pyo.NonNegativeIntegers, bounds=fruit_bounds)
 
 # Add objective - we want to maximize income in our basket
 model.income = pyo.Objective(expr = sum( fruits[fruit]['price'] * model.quantity[fruit] for fruit in model.fruits ), sense=pyo.maximize)
