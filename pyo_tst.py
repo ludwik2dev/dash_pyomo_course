@@ -7,25 +7,30 @@ fruits = {
     'Apple': {'price': 4, 'size': 3, 'max_quantity': 20},
     'Pear': {'price': 7, 'size': 5, 'max_quantity': 10},
 }
-MAX_BASKET_SIZE = 60
+baskets = {
+    'Basket 1': {'max_size': 45, 'storage_cost': 2},
+    'Basket 2': {'max_size': 35, 'storage_cost': 3},
+}
 
 # Initialize model
 model = pyo.ConcreteModel()
 
 # Add set
 model.fruits = pyo.Set(initialize=fruits.keys())
+model.baskets = pyo.Set(initialize=baskets.keys())
 
 # Add variable - this we want to calculate / find
-def fruit_bounds(m, fruit):
+def fruit_bounds(m, _basket, fruit):
     return ( 0, fruits[fruit]['max_quantity'] )
 
-model.quantity = pyo.Var(model.fruits, domain=pyo.NonNegativeIntegers, bounds=fruit_bounds)
+model.quantity = pyo.Var(model.baskets, model.fruits, domain=pyo.NonNegativeIntegers, bounds=fruit_bounds)
 
 # Add objective - we want to maximize income in our basket
-model.income = pyo.Objective(expr = sum( fruits[fruit]['price'] * model.quantity[fruit] for fruit in model.fruits ), sense=pyo.maximize)
+model.income = pyo.Objective(expr = sum( ( fruits[fruit]['price'] - baskets[basket]['storage_cost'] ) * model.quantity[basket, fruit] for fruit in model.fruits for basket in model.baskets ), sense=pyo.maximize)
 
-# Add constraint - max size of our basket
-model.basket = pyo.Constraint(expr = sum( fruits[fruit]['size'] * model.quantity[fruit] for fruit in model.fruits ) <= MAX_BASKET_SIZE )
+# Add constraint - max size of our baskets
+model.basket = pyo.Constraint(model.baskets, rule=lambda m, basket: sum( fruits[fruit]['size'] * m.quantity[basket, fruit] for fruit in model.fruits ) <= baskets[basket]['max_size'] )
+model.sum_quantity = pyo.Constraint(model.fruits, rule=lambda m, fruit: sum( m.quantity[basket, fruit] for basket in model.baskets ) <= fruits[fruit]['max_quantity'] )
 
 # Solve model
 solver_name = 'cbc'
@@ -35,5 +40,6 @@ results = solver.solve(model)
 
 # Print results
 print( f'Total income: {pyo.value(model.income)}' )
-for fruit in model.fruits:
-    print( f'{fruit} quantity: {model.quantity[fruit]()}' )
+for basket in model.baskets:
+    for fruit in model.fruits:
+        print( f'{fruit} quantity in {basket}: {model.quantity[basket, fruit]()}' )
