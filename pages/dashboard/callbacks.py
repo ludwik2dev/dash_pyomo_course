@@ -39,10 +39,7 @@ def make_alerts(alerts, msg, color):
 )
 def generate_results(click, units, alerts):
     
-    '''Simulating running pyomo model'''
-    time.sleep(3)
-    
-    model = uc_model(units)
+    model, sys_cost = uc_model(units)
     if not model:
 
         sys_cost = 'No solution for provided input.'
@@ -53,13 +50,11 @@ def generate_results(click, units, alerts):
 
         return None, sys_cost, alerts
 
-    sys_cost = model[1]
-    
     msg = f'Model was computed successfully'  
     color = 'success'
     alerts = make_alerts(alerts, msg, color)
 
-    return model[0], sys_cost, alerts
+    return model, sys_cost, alerts
 
 
 @callback(
