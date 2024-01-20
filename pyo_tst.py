@@ -38,8 +38,19 @@ solver_path = pathlib.Path(__file__).parent.resolve() / f'{solver_name}.exe'
 solver = pyo.SolverFactory(solver_name, executable=solver_path)
 results = solver.solve(model)
 
-# Print results
-print( f'Total income: {pyo.value(model.income)}' )
-for basket in model.baskets:
-    for fruit in model.fruits:
-        print( f'{fruit} quantity in {basket}: {model.quantity[basket, fruit]()}' )
+# Print status 
+if (results.solver.status == pyo.SolverStatus.ok) and (results.solver.termination_condition in [pyo.TerminationCondition.optimal, pyo.TerminationCondition.feasible]):
+    # Print results
+    print( f'Total income: {pyo.value(model.income)}' )
+    for basket in model.baskets:
+        for fruit in model.fruits:
+            print( f'{fruit} quantity in {basket}: {model.quantity[basket, fruit]()}' )
+
+elif (results.solver.termination_condition == pyo.TerminationCondition.infeasible):
+    print('Model is infeasible') 
+
+elif (results.solver.termination_condition == pyo.TerminationCondition.unbounded):
+    print('Model is unbounded') 
+
+else:
+    print('Unhandled error. Solver Status: ',  results.solver.status)
