@@ -16,6 +16,7 @@ def uc_model(units):
     
     # ## Constants
     HOURS = [t for t in range(1, 25)]
+    MIN_POWER = 0.4
 
     # ## Profiles
     demand_profile = { hour+1: value for hour, value in enumerate(input.profiles['demand']) }
@@ -36,6 +37,7 @@ def uc_model(units):
 
     # ## Variables
     model.power = pyo.Var(model.plants, model.hours, domain=pyo.NonNegativeReals, bounds=power_bounds)
+    model.on = pyo.Var(model.plants, model.hours, domain=pyo.Binary)
 
     # ## Objective - minimize cost of the power system
     model.system_costs = pyo.Objective(
@@ -56,7 +58,8 @@ def uc_model(units):
         )
 
     # Max plant power
-    model.ct_plant_power = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.power[plant, hour] <= plants[plant]['power'] )
+    model.ct_plant_max_power = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.power[plant, hour] <= plants[plant]['power'] * m.on[plant, hour] )
+    model.ct_plant_min_power = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.power[plant, hour] >= MIN_POWER * plants[plant]['power'] * m.on[plant, hour] )
 
     # ## Solve the model
     solver_name = 'cbc'
