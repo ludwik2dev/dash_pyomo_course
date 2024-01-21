@@ -17,6 +17,7 @@ def uc_model(units):
     # ## Constants
     HOURS = [t for t in range(1, 25)]
     MIN_POWER = 0.4
+    START_UP_COST = 10
 
     # ## Profiles
     demand_profile = { hour+1: value for hour, value in enumerate(input.profiles['demand']) }
@@ -38,15 +39,21 @@ def uc_model(units):
     # ## Variables
     model.power = pyo.Var(model.plants, model.hours, domain=pyo.NonNegativeReals, bounds=power_bounds)
     model.on = pyo.Var(model.plants, model.hours, domain=pyo.Binary)
+    model.change_state = pyo.Var(model.plants, model.hours, domain=pyo.Integers)  # switch-on = 1, switch-off = -1, else 0
+    model.switch_on = pyo.Var(model.plants, model.hours, domain=pyo.NonNegativeIntegers)
+    model.switch_off = pyo.Var(model.plants, model.hours, domain=pyo.NonPositiveIntegers)
 
     # ## Objective - minimize cost of the power system
     model.system_costs = pyo.Objective(
         expr = 
         
         # Plants variable cost
-        + sum( model.power[plant, hour] * plants[plant]['vc'] for hour in model.hours for plant in model.plants ),
+        + sum( model.power[plant, hour] * plants[plant]['vc'] for hour in model.hours for plant in model.plants )
+
+        # Plants start-up cost
+        + sum( START_UP_COST * plants[plant]['vc'] * plants[plant]['power'] * model.switch_on[plant, hour] for hour in model.hours for plant in model.plants )
         
-        sense=pyo.minimize)
+        , sense=pyo.minimize)
 
     # ## Constraints
 
@@ -60,6 +67,10 @@ def uc_model(units):
     # Max plant power
     model.ct_plant_max_power = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.power[plant, hour] <= plants[plant]['power'] * m.on[plant, hour] )
     model.ct_plant_min_power = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.power[plant, hour] >= MIN_POWER * plants[plant]['power'] * m.on[plant, hour] )
+
+    # Plant start up
+    model.ct_change_state = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.change_state[plant, hour] == m.on[plant, hour] - m.on[plant, hour-1] if hour > 1 else m.change_state[plant, hour] == m.on[plant, hour] )
+    model.ct_switch = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.change_state[plant, hour] == m.switch_on[plant, hour] + m.switch_off[plant, hour] )
 
     # ## Solve the model
     solver_name = 'cbc'
@@ -76,6 +87,15 @@ def uc_model(units):
         # print('\t\t', [ str(hour).rjust(2, ' ') for hour in model.hours ], end='\n\n')
         # for unit in model.plants:
         #     print(unit.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.on[unit, hour]))).rjust(2, ' ') for hour in model.hours ])
+
+        # # Printing start-up related variables
+        # print('\t\t\t', [ str(hour).rjust(2, ' ') for hour in model.hours ], end='\n\n')
+        # for unit in model.plants:
+        #     print('On:', unit.ljust(15, ' ') , '\t', [ str(int(pyo.value(model.on[unit, hour]))).rjust(2, ' ') for hour in model.hours ])
+        #     print('State:', unit.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.change_state[unit, hour]))).rjust(2, ' ') for hour in model.hours ])
+        #     print('Switch on:', unit.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.switch_on[unit, hour]))).rjust(2, ' ') for hour in model.hours ])
+        #     print('Switch off:', unit.ljust(8, ' ') , '\t', [ str(int(pyo.value(-model.switch_off[unit, hour]))).rjust(2, ' ') for hour in model.hours ])
+        #     print(end='\n')
 
         # System cost
         sys_cost = round(pyo.value(model.system_costs), 0)
