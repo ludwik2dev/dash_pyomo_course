@@ -72,6 +72,10 @@ def uc_model(units):
     model.ct_change_state = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.change_state[plant, hour] == m.on[plant, hour] - m.on[plant, hour-1] if hour > 1 else m.change_state[plant, hour] == m.on[plant, hour] )
     model.ct_switch = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.change_state[plant, hour] == m.switch_on[plant, hour] + m.switch_off[plant, hour] )
 
+    # Plant ramp
+    model.ramp_up = pyo.Constraint(   model.plants, model.hours, rule=lambda m, plant, hour: m.power[plant, hour] - m.power[plant, hour-1] <= + plants[plant]['ramp'] if hour > 1 else pyo.Constraint.Skip )
+    model.ramp_down = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.power[plant, hour] - m.power[plant, hour-1] >= - plants[plant]['ramp'] if hour > 1 else pyo.Constraint.Skip )
+
     # ## Solve the model
     solver_name = 'cbc'
     solver_path = pathlib.Path(__file__).parent.resolve() / f'{solver_name}.exe'
