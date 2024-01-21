@@ -72,6 +72,11 @@ def uc_model(units):
 
         print(f'Model is {results.solver.termination_condition}')
 
+        # # Printing m.on
+        # print('\t\t', [ str(hour).rjust(2, ' ') for hour in model.hours ], end='\n\n')
+        # for unit in model.plants:
+        #     print(unit.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.on[unit, hour]))).rjust(2, ' ') for hour in model.hours ])
+
         # System cost
         sys_cost = round(pyo.value(model.system_costs), 0)
         sys_cost = f'{sys_cost} $'
