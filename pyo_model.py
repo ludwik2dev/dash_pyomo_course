@@ -1,4 +1,5 @@
 import pyomo.environ as pyo
+import pyomo.gdp as gdp
 import pathlib
 import math
 import time
@@ -103,6 +104,10 @@ def uc_model(units):
     model.ct_plant_min_power = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.power[plant, hour] >= MIN_POWER * plants[plant]['power'] * m.on[plant, hour] )
     model.ct_plant_opt_power = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.power[plant, hour] == m.power_neg[plant, hour] + OPT_POWER * plants[plant]['power'] * m.on[plant, hour] + m.power_pos[plant, hour] )
 
+    # Do not allow negative / positive power in the same time
+    model.dj_plant = gdp.Disjunction( model.plants, model.hours, rule=lambda m, plant, hour: [ m.power_neg[plant, hour] == 0, m.power_pos[plant, hour] == 0 ] )
+    pyo.TransformationFactory('gdp.hull').apply_to(model)
+
     # Plant start up
     model.ct_change_state = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.change_state[plant, hour] == m.on[plant, hour] - m.on[plant, hour-1] if hour > 1 else m.change_state[plant, hour] == m.on[plant, hour] )
     model.ct_switch = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.change_state[plant, hour] == m.switch_on[plant, hour] + m.switch_off[plant, hour] )
@@ -152,6 +157,14 @@ def uc_model(units):
         #         n = n + on
         # print(f'\nPower variance: {round( total / n , 2)}\n')
         # print(f'Execution time: {round( time.time() - start_time, 2 )}\n')
+
+        # # Printing optimal power related variables
+        # print('\t\t\t', [ str(hour).rjust(3, ' ') for hour in model.hours ], end='\n\n')
+        # print('Power:', 'Gas 3'.ljust(15, ' ') , '\t', [ str(int(pyo.value(model.power['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
+        # print('Mode:', 'Gas 3'.ljust(15, ' ') , '\t', [ str(int(pyo.value(model.on['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
+        # print('Opt power:', 'Gas 3'.ljust(8, ' ') , '\t', [ str(int(OPT_POWER * plants['Gas 3']['power'])).rjust(3, ' ') for hour in model.hours ])
+        # print('Pos power:', 'Gas 3'.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.power_pos['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
+        # print('Neg power:', 'Gas 3'.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.power_neg['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
 
         # System cost
         sys_cost = round(pyo.value(model.system_costs), 0)
