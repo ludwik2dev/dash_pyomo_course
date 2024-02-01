@@ -274,7 +274,6 @@ def delete_annotations(row_selected):
     Output('id-modal-update-delete-unit-header', 'children'),
     Output('id-input-update-delete-power', 'value'),
     Output('id-input-update-delete-vc', 'value'),
-    Output('id-input-update-delete-ramp', 'value'),
     Output('id-input-update-delete-lat', 'value'),
     Output('id-input-update-delete-lon', 'value'),
     Input('id-graph-map', 'clickData'),
@@ -289,11 +288,10 @@ def open_modal_update_delete_unit(clickData, units):
     unit = clickData['points'][0]['text']
     power = units[unit]['power']
     vc = units[unit]['vc']
-    ramp = units[unit]['ramp']
     lat = units[unit]['lat']
     lon = units[unit]['lon']
     
-    return True, None, unit, power, vc, ramp, lat, lon
+    return True, None, unit, power, vc, lat, lon
 
 
 @callback(
@@ -326,14 +324,13 @@ def delete_unit(click, data, name, alerts):
     State('id-modal-update-delete-unit-header', 'children'),
     State('id-input-update-delete-power', 'value'),
     State('id-input-update-delete-vc', 'value'),
-    State('id-input-update-delete-ramp', 'value'),
     State('id-alert-container', 'children'),
     prevent_initial_call=True
 )
-def update_unit(click, data, name, power, vc, ramp, alerts):
+def update_unit(click, data, name, power, vc, alerts):
 
     # Error handling
-    for value in [power, vc, ramp]:
+    for value in [power, vc]:
         if value is None or value < 0 or value > 1500:
             msg = f'Unit: {name} was not updated.'
             color = 'warning'
@@ -342,7 +339,6 @@ def update_unit(click, data, name, power, vc, ramp, alerts):
 
     data[name]['power'] = power
     data[name]['vc'] = vc
-    data[name]['ramp'] = ramp
 
     msg = f'Updated unit: {name}'
     color = 'success'
@@ -381,16 +377,15 @@ def open_modal_create_unit(select):
     State('id-input-create-type', 'value'),
     State('id-input-create-power', 'value'),
     State('id-input-create-vc', 'value'),
-    State('id-input-create-ramp', 'value'),
     State('id-input-create-lat', 'value'),
     State('id-input-create-lon', 'value'),
     State('id-alert-container', 'children'),
     prevent_initial_call=True
 )
-def create_unit(click, data, name, kind, power, vc, ramp, lat, lon, alerts):
+def create_unit(click, data, name, kind, power, vc, lat, lon, alerts):
 
     # Error handling
-    for value in [power, vc, ramp]:
+    for value in [power, vc]:
         if value is None or value < 0 or value > 1500:
             msg = f'Unit: {name} was not created.'
             color = 'warning'
@@ -403,7 +398,6 @@ def create_unit(click, data, name, kind, power, vc, ramp, lat, lon, alerts):
         'lon': lon, 
         'power': power, 
         'vc': vc, 
-        'ramp': ramp,
     }
     data[name] = new_unit
 

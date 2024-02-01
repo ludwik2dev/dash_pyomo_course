@@ -24,12 +24,6 @@ modal_update_delete = dbc.Modal([
                         width=9,
                     )], className='mb-3'),
             dbc.Row([
-                    dbc.Label('Ramp', width=3, html_for='id-input-update-delete-ramp'),
-                    dbc.Col(
-                        dbc.Input(id='id-input-update-delete-ramp', type='number'), 
-                        width=9,
-                    )], className='mb-3'),
-            dbc.Row([
                     dbc.Label('Latitude', width=3, html_for='id-input-update-delete-lat'),
                     dbc.Col(
                         dbc.Input(id='id-input-update-delete-lat', type='number', disabled=True),
@@ -81,12 +75,6 @@ modal_create = dbc.Modal([
                     dbc.Label('Variable cost', width=3, html_for='id-input-create-vc'),
                     dbc.Col(
                         dbc.Input(id='id-input-create-vc', type='number', value=100), 
-                        width=9,
-                    )], className='mb-3'),
-            dbc.Row([
-                    dbc.Label('Ramp', width=3, html_for='id-input-create-ramp'),
-                    dbc.Col(
-                        dbc.Input(id='id-input-create-ramp', type='number', value=100), 
                         width=9,
                     )], className='mb-3'),
             dbc.Row([
