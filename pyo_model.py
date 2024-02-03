@@ -39,9 +39,9 @@ def uc_model(units):
     # ## Variables
     model.power = pyo.Var(model.plants, model.hours, domain=pyo.NonNegativeReals, bounds=power_bounds)
     model.on = pyo.Var(model.plants, model.hours, domain=pyo.Binary)
-    model.change_state = pyo.Var(model.plants, model.hours, domain=pyo.Integers)  # switch-on = 1, switch-off = -1, else 0
-    model.switch_on = pyo.Var(model.plants, model.hours, domain=pyo.NonNegativeIntegers)
-    model.switch_off = pyo.Var(model.plants, model.hours, domain=pyo.NonPositiveIntegers)
+    model.change_state = pyo.Var(model.plants, model.hours, domain=pyo.Integers, bounds=(-1, 1))  # switch-on = 1, switch-off = -1, else 0
+    model.switch_on = pyo.Var(model.plants, model.hours, domain=pyo.NonNegativeIntegers, bounds=(-1, 1))
+    model.switch_off = pyo.Var(model.plants, model.hours, domain=pyo.NonPositiveIntegers, bounds=(-1, 1))
 
     # ## Objective - minimize cost of the power system
     model.system_costs = pyo.Objective(
@@ -71,22 +71,6 @@ def uc_model(units):
     # Plant start up
     model.ct_change_state = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.change_state[plant, hour] == m.on[plant, hour] - m.on[plant, hour-1] if hour > 1 else m.change_state[plant, hour] == m.on[plant, hour] )
     model.ct_switch = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.change_state[plant, hour] == m.switch_on[plant, hour] + m.switch_off[plant, hour] )
-
-    # Plant ramp
-    model.ramp_up = pyo.Constraint(   
-        model.plants, model.hours, rule=lambda m, plant, hour: 
-        m.power[plant, hour] - m.power[plant, hour-1] 
-        <= 
-        + plants[plant]['ramp'] * model.on[plant, hour-1] 
-        + MIN_POWER * plants[plant]['power'] * (1 - model.on[plant, hour-1])
-        if hour > 1 else pyo.Constraint.Skip )
-    model.ramp_down = pyo.Constraint( 
-        model.plants, model.hours, rule=lambda m, plant, hour: 
-        m.power[plant, hour] - m.power[plant, hour-1] 
-        >= 
-        - plants[plant]['ramp'] * model.on[plant, hour] 
-        - plants[plant]['power'] * (1 - model.on[plant, hour])
-        if hour > 1 else pyo.Constraint.Skip )
 
     # ## Solve the model
     solver_name = 'cbc'
