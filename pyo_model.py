@@ -170,13 +170,13 @@ def uc_model(units):
         # print(f'\nPower variance: {round( total / n , 2)}\n')
         # print(f'Execution time: {round( time.time() - start_time, 2 )}\n')
 
-        # Printing optimal power related variables
-        print('\t\t\t', [ str(hour).rjust(3, ' ') for hour in model.hours ], end='\n\n')
-        print('Power:', 'Gas 3'.ljust(15, ' ') , '\t', [ str(int(pyo.value(model.power['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
-        print('Mode:', 'Gas 3'.ljust(15, ' ') , '\t', [ str(int(pyo.value(model.on['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
-        print('Opt power:', 'Gas 3'.ljust(8, ' ') , '\t', [ str(int(OPT_POWER * plants['Gas 3']['power'])).rjust(3, ' ') for hour in model.hours ])
-        print('Pos power:', 'Gas 3'.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.power_pos['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
-        print('Neg power:', 'Gas 3'.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.power_neg['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
+        # # Printing optimal power related variables
+        # print('\t\t\t', [ str(hour).rjust(3, ' ') for hour in model.hours ], end='\n\n')
+        # print('Power:', 'Gas 3'.ljust(15, ' ') , '\t', [ str(int(pyo.value(model.power['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
+        # print('Mode:', 'Gas 3'.ljust(15, ' ') , '\t', [ str(int(pyo.value(model.on['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
+        # print('Opt power:', 'Gas 3'.ljust(8, ' ') , '\t', [ str(int(OPT_POWER * plants['Gas 3']['power'])).rjust(3, ' ') for hour in model.hours ])
+        # print('Pos power:', 'Gas 3'.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.power_pos['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
+        # print('Neg power:', 'Gas 3'.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.power_neg['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
 
         # System cost
         sys_cost = round(pyo.value(model.system_costs), 0)
