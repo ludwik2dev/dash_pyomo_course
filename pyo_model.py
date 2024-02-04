@@ -54,10 +54,14 @@ def uc_model(units):
 
     # ## Profiles
     demand_profile = { hour+1: value for hour, value in enumerate(input.profiles['demand']) }
+    wind_profile = { hour+1: value for hour, value in enumerate(input.profiles['wind']) }
+    pv_profile = { hour+1: value for hour, value in enumerate(input.profiles['pv']) }
 
     # ## Units
     plants = { key: val for key, val in units.items() if units[key]['type'] in ['coal', 'gas', 'nuclear'] }
     demand_sources = { key: val for key, val in units.items() if units[key]['type'] in ['demand'] }
+    wind_farms = { key: val for key, val in units.items() if units[key]['type'] in ['wind'] }
+    pv_farms = { key: val for key, val in units.items() if units[key]['type'] in ['pv'] }
     
     # ### Pyomo model
 
@@ -68,6 +72,8 @@ def uc_model(units):
     model.hours = pyo.Set(initialize=HOURS)
     model.plants = pyo.Set(initialize=list(plants.keys()))
     model.demand_sources = pyo.Set(initialize=list(demand_sources.keys()))
+    model.wind_farms = pyo.Set(initialize=list(wind_farms.keys()))
+    model.pv_farms = pyo.Set(initialize=list(pv_farms.keys()))
 
     # ## Variables
     model.power = pyo.Var(model.plants, model.hours, domain=pyo.NonNegativeReals, bounds=power_bounds)
@@ -95,6 +101,8 @@ def uc_model(units):
     # Demand has to be fullfilled in each hour (not less not more)
     model.demand = pyo.Constraint(model.hours, rule=lambda m, hour:
         + sum( m.power[plant, hour] for plant in m.plants )
+        + sum( wind_farms[ele]['power'] * wind_profile[hour] for ele in m.wind_farms )
+        + sum( pv_farms[ele]['power'] * pv_profile[hour] for ele in m.pv_farms )
         ==
         + sum( demand_sources[ele]['power'] * demand_profile[hour] for ele in m.demand_sources )
         )
@@ -134,7 +142,7 @@ def uc_model(units):
     nlp_solver = 'ipopt'
     solver = pyo.SolverFactory('mindtpy')
     start_time = time.time()
-    results = solver.solve(model, mip_solver=mip_solver, nlp_solver=nlp_solver)  # absolute_bound_tolerance=0.01, relative_bound_tolerance=0.01, small_dual_tolerance=0.01, integer_tolerance=0.01
+    results = solver.solve(model, mip_solver=mip_solver, nlp_solver=nlp_solver, constraint_tolerance=0.1, absolute_bound_tolerance=0.1, relative_bound_tolerance=0.1, small_dual_tolerance=0.1, integer_tolerance=0.1)  # absolute_bound_tolerance=0.01, relative_bound_tolerance=0.01, small_dual_tolerance=0.01, integer_tolerance=0.01
 
     # ## Optimalization results 
     if (results.solver.status == pyo.SolverStatus.ok) and (results.solver.termination_condition in [pyo.TerminationCondition.optimal, pyo.TerminationCondition.feasible]):
@@ -188,6 +196,16 @@ def uc_model(units):
             model.results[unit] = {}
             for hour in model.hours:
                 power = round(pyo.value(model.power[unit, hour]), 2)
+                model.results[unit][hour] = power
+        for unit in model.pv_farms:
+            model.results[unit] = {}
+            for hour in model.hours:
+                power = pv_farms[unit]['power'] * pv_profile[hour]
+                model.results[unit][hour] = power
+        for unit in model.wind_farms:
+            model.results[unit] = {}
+            for hour in model.hours:
+                power = wind_farms[unit]['power'] * wind_profile[hour]
                 model.results[unit][hour] = power
         
         return model.results, sys_cost
