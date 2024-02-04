@@ -36,13 +36,14 @@ if __name__ == '__main__':
     if mode == 'PRD':
 
         from waitress import serve
-        import platform
+        import socket
 
 
-        computer_name = platform.node()
+        host_name = socket.gethostname()
+        ip_address = socket.gethostbyname(host_name)
         wsgi_app = app.server
 
-        serve(wsgi_app, host=computer_name, port=8080)
+        serve(wsgi_app, host=ip_address, port=8080)
 
     elif mode == "DEV":
         app.run(debug=True)
