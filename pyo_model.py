@@ -21,6 +21,18 @@ def uc_model(units):
     def power_neg_bounds(_m, plant, _hour):
         return ( -plants[plant]['power'] * ( OPT_POWER - MIN_POWER ), 0 )
     
+    def b_load_bounds(_m, battery, _hour):
+        return ( 0, batteries[battery]['power'] )
+
+    def b_reload_bounds(_m, battery, _hour):
+        return ( -batteries[battery]['power'], 0 )
+    
+    def b_bounds(_m, battery, _hour):
+        return ( -batteries[battery]['power'], batteries[battery]['power'] )
+    
+    def b_volume_bounds(_m, battery, _hour):
+        return ( 0, batteries[battery]['power'] * BATTERY_LOAD_TIME)
+    
     def vc(m, plant, hour):
 
         '''Additional vc cost related to deviation from optimal point'''
@@ -51,6 +63,9 @@ def uc_model(units):
     START_UP_COST = 10
     OPT_POWER = 0.7
     DEVIATION_COST = 1.25
+    BATTERY_EFF = 0.6
+    BATTERY_START = 0.5  # 0 - fully discharged, 0 - fully charged
+    BATTERY_LOAD_TIME = 5  # hours
 
     # ## Profiles
     demand_profile = { hour+1: value for hour, value in enumerate(input.profiles['demand']) }
@@ -62,6 +77,7 @@ def uc_model(units):
     demand_sources = { key: val for key, val in units.items() if units[key]['type'] in ['demand'] }
     wind_farms = { key: val for key, val in units.items() if units[key]['type'] in ['wind'] }
     pv_farms = { key: val for key, val in units.items() if units[key]['type'] in ['pv'] }
+    batteries = { key: val for key, val in units.items() if units[key]['type'] in ['battery'] }
     
     # ### Pyomo model
 
@@ -74,6 +90,7 @@ def uc_model(units):
     model.demand_sources = pyo.Set(initialize=list(demand_sources.keys()))
     model.wind_farms = pyo.Set(initialize=list(wind_farms.keys()))
     model.pv_farms = pyo.Set(initialize=list(pv_farms.keys()))
+    model.batteries = pyo.Set(initialize=list(batteries.keys()))
 
     # ## Variables
     model.power = pyo.Var(model.plants, model.hours, domain=pyo.NonNegativeReals, bounds=power_bounds)
@@ -83,6 +100,11 @@ def uc_model(units):
     model.change_state = pyo.Var(model.plants, model.hours, domain=pyo.Integers, bounds=(-1, 1))  # switch-on = 1, switch-off = -1, else 0
     model.switch_on = pyo.Var(model.plants, model.hours, domain=pyo.NonNegativeIntegers, bounds=(-1, 1))
     model.switch_off = pyo.Var(model.plants, model.hours, domain=pyo.NonPositiveIntegers, bounds=(-1, 1))
+    
+    model.b_load = pyo.Var(model.batteries, model.hours, domain=pyo.NonNegativeReals, bounds=b_load_bounds)
+    model.b_reload = pyo.Var(model.batteries, model.hours, domain=pyo.NonPositiveReals, bounds=b_reload_bounds)
+    model.b_power = pyo.Var(model.batteries, model.hours, domain=pyo.Reals, bounds=b_bounds)
+    model.b_volume = pyo.Var(model.batteries, model.hours, domain=pyo.NonNegativeReals, bounds=b_volume_bounds)
 
     # ## Objective - minimize cost of the power system
     model.system_costs = pyo.Objective(
@@ -93,6 +115,9 @@ def uc_model(units):
 
         # Plants start-up cost
         + sum( START_UP_COST * plants[plant]['vc'] * plants[plant]['power'] * model.switch_on[plant, hour] for hour in model.hours for plant in model.plants )
+
+        # Batteries variable cost
+        + sum( model.b_load[battery, hour] * batteries[battery]['vc'] for hour in model.hours for battery in model.batteries ) 
         
         , sense=pyo.minimize)
 
@@ -103,8 +128,10 @@ def uc_model(units):
         + sum( m.power[plant, hour] for plant in m.plants )
         + sum( wind_farms[ele]['power'] * wind_profile[hour] for ele in m.wind_farms )
         + sum( pv_farms[ele]['power'] * pv_profile[hour] for ele in m.pv_farms )
+        + sum( -m.b_reload[battery, hour] for battery in m.batteries )
         ==
         + sum( demand_sources[ele]['power'] * demand_profile[hour] for ele in m.demand_sources )
+        + sum( m.b_load[battery, hour] for battery in m.batteries )
         )
 
     # Max plant power
@@ -114,7 +141,7 @@ def uc_model(units):
 
     # Do not allow negative / positive power in the same time
     model.dj_plant = gdp.Disjunction( model.plants, model.hours, rule=lambda m, plant, hour: [ m.power_neg[plant, hour] == 0, m.power_pos[plant, hour] == 0 ] )
-    pyo.TransformationFactory('gdp.hull').apply_to(model)
+    # pyo.TransformationFactory('gdp.hull').apply_to(model)
 
     # Plant start up
     model.ct_change_state = pyo.Constraint( model.plants, model.hours, rule=lambda m, plant, hour: m.change_state[plant, hour] == m.on[plant, hour] - m.on[plant, hour-1] if hour > 1 else m.change_state[plant, hour] == m.on[plant, hour] )
@@ -135,11 +162,24 @@ def uc_model(units):
         - plants[plant]['ramp'] * model.on[plant, hour] 
         - plants[plant]['power'] * (1 - model.on[plant, hour])
         if hour > 1 else pyo.Constraint.Skip )
+    
+    # Battery volume
+    model.b_volume_state = pyo.Constraint( model.batteries, model.hours, rule=lambda m, battery, hour: 
+        m.b_volume[battery, hour] == m.b_load[battery, hour] * BATTERY_EFF + m.b_reload[battery, hour] + m.b_volume[battery, hour-1] if hour > 1 else
+        m.b_volume[battery, hour] == m.b_load[battery, hour] * BATTERY_EFF + m.b_reload[battery, hour] + batteries[battery]['power'] * BATTERY_START * BATTERY_LOAD_TIME
+        )
+
+    # Do not load / reload in the same time
+    model.dj_battery = gdp.Disjunction( model.batteries, model.hours, rule=lambda m, battery, hour: [ m.b_load[battery, hour] == 0, m.b_reload[battery, hour] == 0 ] )
+    
+    # Sum load and reload
+    model.b_power_sum = pyo.Constraint( model.batteries, model.hours, rule=lambda m, battery, hour: m.b_power[battery, hour] == m.b_load[battery, hour] + m.b_reload[battery, hour] )
 
     # ## Solve the model
     mip_solver = 'cbc'
     # solver_path = pathlib.Path(__file__).parent.resolve() / f'{solver_name}.exe'
     nlp_solver = 'ipopt'
+    pyo.TransformationFactory('gdp.hull').apply_to(model)
     solver = pyo.SolverFactory('mindtpy')
     start_time = time.time()
     results = solver.solve(model, mip_solver=mip_solver, nlp_solver=nlp_solver, constraint_tolerance=0.1, absolute_bound_tolerance=0.1, relative_bound_tolerance=0.1, small_dual_tolerance=0.1, integer_tolerance=0.1)  # absolute_bound_tolerance=0.01, relative_bound_tolerance=0.01, small_dual_tolerance=0.01, integer_tolerance=0.01
@@ -186,6 +226,13 @@ def uc_model(units):
         # print('Pos power:', 'Gas 3'.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.power_pos['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
         # print('Neg power:', 'Gas 3'.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.power_neg['Gas 3', hour]))).rjust(3, ' ') for hour in model.hours ])
 
+        # # Printing battery related variables
+        # print('\t\t\t', [ str(hour).rjust(4, ' ') for hour in model.hours ], end='\n\n')
+        # print('Volume:', 'Battery 1'.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.b_volume['Battery 1', hour]))).rjust(4, ' ') for hour in model.hours ])
+        # print('Load:', 'Battery 1'.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.b_load['Battery 1', hour]))).rjust(4, ' ') for hour in model.hours ])
+        # print('Reload:', 'Battery 1'.ljust(8, ' ') , '\t', [ str(int(pyo.value(model.b_reload['Battery 1', hour]))).rjust(4, ' ') for hour in model.hours ])
+        # print('Sum:', 'Battery 1'.ljust(15, ' ') , '\t', [ str(int(pyo.value(model.b_reload['Battery 1', hour]))).rjust(4, ' ') for hour in model.hours ])
+
         # System cost
         sys_cost = round(pyo.value(model.system_costs), 0)
         sys_cost = f'{sys_cost} $'
@@ -207,6 +254,11 @@ def uc_model(units):
             for hour in model.hours:
                 power = wind_farms[unit]['power'] * wind_profile[hour]
                 model.results[unit][hour] = power
+        for unit in model.batteries:
+            model.results[unit] = {}
+            for hour in model.hours:
+                power = round(pyo.value(model.b_power[unit, hour]), 2)
+                model.results[unit][hour] = -power
         
         return model.results, sys_cost
 

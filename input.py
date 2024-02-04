@@ -8,8 +8,9 @@ units = {
     'Nuclear 1': { 'type': 'nuclear', 'vc': 0.1, 'power': 800,  'lat': 32.35, 'lon': -95.40,  'ramp': 300 }, 
     'Demand 1':  { 'type': 'demand',  'vc': 0,   'power': 1000, 'lat': 29.98, 'lon': -95.34,  'ramp': 0   },
     'Demand 2':  { 'type': 'demand',  'vc': 0,   'power': 700,  'lat': 32.84, 'lon': -96.85,  'ramp': 0   },
-    'Wind 1':    { 'type': 'wind',    'vc': 0.01,'power': 400,  'lat': 27.77, 'lon': -97.50,  'ramp': 0   },
-    'PV 1':      { 'type': 'pv',      'vc': 0,   'power': 300,  'lat': 31.68, 'lon': -99.49,  'ramp': 0   }, 
+    'Wind 1':    { 'type': 'wind',    'vc': 0.01,'power': 600,  'lat': 27.77, 'lon': -97.50,  'ramp': 0   },
+    'PV 1':      { 'type': 'pv',      'vc': 0,   'power': 800,  'lat': 31.68, 'lon': -99.49,  'ramp': 0   }, 
+    'Battery 1': { 'type': 'battery', 'vc': 8,   'power': 400,  'lat': 31.08, 'lon': -100.05, 'ramp': 0   }, 
 }
 
 profiles = {
@@ -25,6 +26,7 @@ units_colors = {
     'demand': '#098331',
     'pv': '#D0D00A',
     'wind': '#0B74B9',
+    'battery': '#B6E7F7',
 }
 
 unit_types = ['coal', 'gas', 'nuclear', 'demand']
