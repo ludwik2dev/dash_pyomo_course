@@ -3,6 +3,7 @@ import pyomo.gdp as gdp
 import pathlib
 import math
 import time
+import os
 
 import input
 
@@ -62,7 +63,7 @@ def uc_model(units):
     MIN_POWER = 0.4
     START_UP_COST = 10
     OPT_POWER = 0.7
-    DEVIATION_COST = 1.25
+    DEVIATION_COST = float( os.environ.get("DEVIATION_COST") )
     BATTERY_EFF = 0.6
     BATTERY_START = 0.5  # 0 - fully discharged, 0 - fully charged
     BATTERY_LOAD_TIME = 5  # hours
@@ -279,4 +280,8 @@ def uc_model(units):
     
 
 if __name__ == '__main__':
+
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+
     uc_model(input.units)

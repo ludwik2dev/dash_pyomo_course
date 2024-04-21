@@ -3,11 +3,11 @@ from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from dotenv import load_dotenv
 import os
+from waitress import serve
+import socket
 
 
-load_dotenv()
-
-mode = os.environ.get("MODE")
+load_dotenv(override=True)
 
 
 app = Dash(
@@ -15,6 +15,7 @@ app = Dash(
     external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP],
     use_pages=True
     )
+server = app.server
 
 app.layout = dbc.Container([
     dbc.NavbarSimple([
@@ -33,19 +34,19 @@ app.layout = dbc.Container([
 
 if __name__ == '__main__':
     
-    if mode == 'PRD':
+    if os.environ.get("MODE") == 'PRD':
 
-        from waitress import serve
-        import socket
-
-
+        # Get your IP address and share it if you are working Intranet)
         host_name = socket.gethostname()
         ip_address = socket.gethostbyname(host_name)
-        wsgi_app = app.server
+        PORT = 8080
 
-        serve(wsgi_app, host=ip_address, port=8080)
+        print(f'Link to share on Intranet: http:{ip_address}:{PORT}')
 
-    elif mode == "DEV":
+        # Go to localhost:<PORT> on local machine
+        serve(server, host='0.0.0.0', port=PORT) 
+
+    elif os.environ.get("MODE") == "DEV":
         app.run(debug=True)
 
     else:
